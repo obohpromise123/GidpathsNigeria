@@ -33,6 +33,8 @@ export interface FieldDef {
   emptyLabel?: string
   /** For type 'relation': which join table stores the links. */
   relation?: 'course_pathways' | 'course_careers'
+  /** Value saved when the field is left blank (for NOT NULL columns). Otherwise blank saves null. */
+  emptyValue?: string | number
   /** Leave out of the insert when blank, so the database default applies. */
   omitIfEmpty?: boolean
   /** Only editable when creating (e.g. readable IDs used in web addresses). */
@@ -147,7 +149,7 @@ export const RESOURCES: ResourceDef[] = [
       { name: 'workplaces', label: 'Workplaces and industries', type: 'list' },
       { name: 'skills', label: 'Skills students develop', type: 'list' },
       { name: 'further_study', label: 'Further study and professional qualifications', type: 'list' },
-      { name: 'typical_duration', label: 'Typical duration', type: 'text' },
+      { name: 'typical_duration', label: 'Typical duration', type: 'text', emptyValue: '' },
       { name: 'interests', label: 'Related interests', type: 'multiselect', options: dims },
       { name: 'institution_types', label: 'Institution types', type: 'multiselect', options: () => INSTITUTION_TYPES },
       { name: 'pathways', label: 'Subject pathways', type: 'relation', relation: 'course_pathways', options: (l) => l.catalog.pathways.map((p) => ({ id: p.id, label: p.name })) },
@@ -188,8 +190,8 @@ export const RESOURCES: ResourceDef[] = [
       { name: 'interests', label: 'Related interests', type: 'multiselect', options: dims },
       { name: 'work_environments', label: 'Work environments', type: 'list' },
       { name: 'start_now', label: 'Skills students can start building now', type: 'list' },
-      { name: 'alternative_routes', label: 'Alternative routes', type: 'textarea' },
-      { name: 'licensing', label: 'Qualification or licensing considerations', type: 'textarea' },
+      { name: 'alternative_routes', label: 'Alternative routes', type: 'textarea', emptyValue: '' },
+      { name: 'licensing', label: 'Qualification or licensing considerations', type: 'textarea', emptyValue: '' },
       { name: 'published', label: 'Show to students', type: 'checkbox' },
     ],
     catalogBacked: true,
@@ -213,13 +215,13 @@ export const RESOURCES: ResourceDef[] = [
       idField(),
       { name: 'name', label: 'Name', type: 'text', required: true },
       { name: 'summary', label: 'Summary', type: 'textarea', required: true },
-      { name: 'overview', label: 'What the pathway involves', type: 'textarea' },
+      { name: 'overview', label: 'What the pathway involves', type: 'textarea', emptyValue: '' },
       { name: 'subjects', label: 'Common subjects', type: 'list' },
       { name: 'skills', label: 'Skills', type: 'list' },
       { name: 'interests', label: 'Related interests', type: 'multiselect', options: dims },
-      { name: 'limitations', label: 'Limitations', type: 'textarea' },
-      { name: 'alternatives', label: 'Alternative routes', type: 'textarea' },
-      { name: 'sort_order', label: 'Display order', type: 'number' },
+      { name: 'limitations', label: 'Limitations', type: 'textarea', emptyValue: '' },
+      { name: 'alternatives', label: 'Alternative routes', type: 'textarea', emptyValue: '' },
+      { name: 'sort_order', label: 'Display order', type: 'number', emptyValue: 0 },
     ],
     catalogBacked: true,
   },
@@ -248,7 +250,7 @@ export const RESOURCES: ResourceDef[] = [
         options: dims,
         help: 'The quiz scores this area from these interests. The first two count most.',
       },
-      { name: 'sort_order', label: 'Display order', type: 'number' },
+      { name: 'sort_order', label: 'Display order', type: 'number', emptyValue: 0 },
     ],
     catalogBacked: true,
   },

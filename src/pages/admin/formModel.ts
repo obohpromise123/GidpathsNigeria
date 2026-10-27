@@ -82,13 +82,13 @@ export function fromFormValues(def: ResourceDef, values: FormValues, isNew: bool
         continue
       case 'number': {
         const s = String(v ?? '').trim()
-        row[f.name] = s === '' ? null : Number(s)
+        row[f.name] = s === '' ? (f.emptyValue ?? null) : Number(s)
         continue
       }
       default: {
         const s = String(v ?? '').trim()
         if (s === '' && f.omitIfEmpty) continue
-        row[f.name] = s === '' ? null : s
+        row[f.name] = s === '' ? (f.emptyValue ?? null) : s
       }
     }
   }

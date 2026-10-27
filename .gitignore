@@ -9,3 +9,11 @@ coverage
 *.log
 node_modules/.tmp
 test-results
+
+# Local Netlify folder
+.netlify
+
+# Supabase CLI local state and secrets (never commit)
+supabase/.db-password
+supabase/.temp
+supabase/.branches

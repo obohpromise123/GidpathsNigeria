@@ -2,6 +2,8 @@
 import type { PGlite } from '@electric-sql/pglite'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { buildSeedCatalog } from '../../src/data/seed/index.ts'
+import { fromFormValues, toFormValues } from '../../src/pages/admin/formModel.ts'
+import { newRecordDefaults, RESOURCES } from '../../src/pages/admin/resources.tsx'
 import { createTestDatabase, createUser, runAs, type Actor } from './harness.ts'
 
 const anon: Actor = { role: 'anon' }
@@ -88,6 +90,13 @@ describe('anonymous visitors', () => {
     )
     expect(rows[0]).toEqual({ school_id: schoolA, school_level: 'ss2', category_id: 'technology' })
     expect(rows[1]).toEqual({ school_id: null, school_level: null, category_id: null })
+  })
+
+  it('cannot call the internal policy helpers through the public API schema', async () => {
+    await expect(runAs(db, anon, `select public.is_admin()`)).rejects.toThrow(/does not exist/)
+    await expect(runAs(db, user, `select public.shares_school_with($1)`, [(admin as { userId: string }).userId])).rejects.toThrow(
+      /does not exist/,
+    )
   })
 
   it('cannot call admin functions', async () => {
@@ -226,6 +235,29 @@ describe('platform administrators', () => {
   it('can view platform usage summary', async () => {
     const { rows } = await runAs<{ event_type: string; total: number }>(db, admin, `select * from public.admin_usage_summary()`)
     expect(rows.find((r) => r.event_type === 'quiz_completed')?.total).toBe(2)
+  })
+})
+
+describe('admin forms', () => {
+  // Every admin form must produce rows the real schema accepts (demo mode
+  // has no constraints, so this is the only place a mismatch shows up).
+  it.each(RESOURCES.map((def) => [def.key, def] as const))('%s: a minimal new record is accepted by the database', async (_key, def) => {
+    const schools = (await db.query<Record<string, unknown>>(`select * from public.schools order by name`)).rows
+    const lookups = { catalog: buildSeedCatalog(), schools }
+    const values = toFormValues(def, newRecordDefaults(def), lookups)
+    for (const f of def.fields) {
+      if (f.type === 'select' && f.required && !values[f.name]) values[f.name] = f.options!(lookups)[0].id
+      if (!f.required || f.type === 'select') continue
+      if (f.type === 'email') values[f.name] = 'form-test@example.com'
+      else if (f.type === 'url') values[f.name] = 'https://example.com'
+      else if (['text', 'textarea'].includes(f.type)) values[f.name] = `Form test ${def.key} ${f.name}`
+    }
+    if ('admission_cycle' in values) values.admission_cycle = 'Form test' // avoid clashing with seeded general guidance
+    const { row } = fromFormValues(def, values, true)
+    const cols = Object.keys(row).join(', ')
+    await runAs(db, admin, `insert into public.${def.table} (${cols}) select ${cols} from jsonb_populate_record(null::public.${def.table}, $1)`, [
+      JSON.stringify(row),
+    ])
   })
 })
 

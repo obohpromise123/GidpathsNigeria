@@ -13,5 +13,8 @@ export default defineConfig({
     testTimeout: 30000,
     // Starting an in-memory Postgres (PGlite) can be slow while other tests run.
     hookTimeout: 120000,
+    // Each database test file runs a full Postgres in memory (PGlite). Two workers
+    // keep the suite reliable on an 8 GB laptop that is also running a browser.
+    maxWorkers: 2,
   },
 })

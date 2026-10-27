@@ -1,5 +1,6 @@
 import { ArrowRight, BookOpen, ChartColumn, ClipboardList, Compass, HandCoins, Route, ShieldCheck, Sparkles, Users } from 'lucide-react'
 import { Link } from 'react-router'
+import { CategoryArt } from '../components/CategoryArt'
 import { CategoryIcon } from '../components/content'
 import { PageTitle } from '../components/layout/Logo'
 import { Badge } from '../components/ui/Badge'
@@ -195,17 +196,20 @@ export default function HomePage() {
             All careers
           </ButtonLink>
         </div>
-        <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <ul className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
           {catalog.categories.map((c) => (
             <li key={c.id}>
               <Link
                 to={`/careers?category=${c.id}`}
-                className="flex h-full flex-col gap-3 rounded-[var(--radius-card)] border border-sand-200 bg-white p-5 transition hover:border-teal-300 hover:shadow-md"
+                className="group flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] border border-sand-200 bg-white transition hover:border-teal-300 hover:shadow-md"
               >
-                <span className="flex size-11 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
-                  <CategoryIcon id={c.id} className="size-6" />
+                <span className="block overflow-hidden">
+                  <CategoryArt id={c.id} className="block aspect-[12/7] w-full transition-transform duration-300 group-hover:scale-105" />
                 </span>
-                <span className="font-bold text-navy-900">{c.name}</span>
+                <span className="flex flex-1 items-start gap-2 p-3 text-sm font-bold text-navy-900 sm:p-4 sm:text-base">
+                  <CategoryIcon id={c.id} className="mt-0.5 size-4 shrink-0 text-teal-700 sm:size-5" />
+                  {c.name}
+                </span>
               </Link>
             </li>
           ))}

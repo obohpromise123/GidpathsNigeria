@@ -25,6 +25,7 @@ All rules are in `supabase/migrations/20261023000200_security.sql` and are teste
 - **Enquiries:** anyone can submit one, but submitters cannot set a status or admin notes, and only admins can read them.
 - **Verification:** a record cannot be "verified" without a source and a date (CHECK constraints). Triggers write each change to `verification_records`, which nobody can edit or delete through the API.
 - **Saved quiz sessions** (for future student accounts) are visible only to their owner.
+- **Policy helpers are not part of the API.** `is_admin`, `is_school_member`, `is_school_admin` and `shares_school_with` live in a `private` schema that the Data API does not expose (migration 20261027000300), as recommended by Supabase's security advisor. The remaining advisor warnings are the five intentionally callable functions: `record_usage_event` and `lookup_school_code` (public by design) and three admin/school summaries that check permissions themselves.
 - **SECURITY DEFINER functions** pin `search_path = ''` and check permissions themselves. EXECUTE is revoked from `public` and granted only to the roles that need it.
 
 ## Frontend safeguards

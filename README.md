@@ -72,7 +72,8 @@ Apply the files in `supabase/migrations/` **in filename order**, then the seed d
 
 1. `supabase/migrations/20261023000100_schema.sql`
 2. `supabase/migrations/20261023000200_security.sql`
-3. `supabase/seed.sql`
+3. `supabase/migrations/20261027000300_private_helpers.sql`
+4. `supabase/seed.sql`
 
 **Option B – Supabase CLI:**
 
@@ -132,11 +133,11 @@ Restart `npm run dev`. The demo banner disappears and data now comes from Supaba
 npm test
 ```
 
-There are **94 automated tests** in four groups:
+There are **106 automated tests** in four groups:
 
 - **Business logic** (`src/lib/*.test.ts`, `src/pages/admin/formModel.test.ts`, `src/data/**/*.test.ts`): recommendation scoring and explanations, roadmap building, search and filters, enquiry validation, privacy suppression of small groups, admin form rules, demo-mode behaviour, and the integrity of the bundled content (every link valid, nothing marked "verified").
 - **User journeys** (`src/app.test.tsx`): the full student flow (onboarding → quiz → results → roadmap), changing answers, course search, enquiry validation, the demo-mode enquiry message, redirects away from protected pages, access denied for the wrong role, and admin course creation with validation.
-- **Database security** (`supabase/tests/rls.test.ts`): applies the real migrations to **PGlite** (PostgreSQL running inside Node.js) and checks the Row Level Security rules as anonymous visitors, ordinary users, school staff and administrators. You don't need Docker or a Supabase account to run these.
+- **Database security** (`supabase/tests/rls.test.ts`): applies the real migrations to **PGlite** (PostgreSQL running inside Node.js) and checks the Row Level Security rules as anonymous visitors, ordinary users, school staff and administrators, and checks that every admin form produces records the real schema accepts. You don't need Docker or a Supabase account to run these.
 - **Seed sync** (`scripts/seed-sql.test.ts`): fails if `src/data/seed` was edited without running `npm run seed:sql`.
 
 **Manual checks worth doing before a demonstration:** run `npm run build` and `npm run preview`, then click through on a phone (or with your browser's device toolbar at 390 px wide). Check keyboard navigation with `Tab`, `Shift+Tab`, `Enter` and the arrow keys on quiz answers.
@@ -244,7 +245,8 @@ The 31 courses and 35 careers are general educational explanations written for t
 - School information page and enquiry form (validation, spam honeypot, honest demo-mode message)
 - Admin dashboard: overview, CRUD for courses, careers, pathways, career areas, institutions, programmes, admission requirements, sources, schools, subscriptions and sponsorships; enquiry management; school staff management; verification workflow and audit history
 - School dashboard: profile (editable by school admins), staff list, school code, anonymous participation with small-group suppression, subscription status, printable report
-- Database schema, RLS policies, grants and RPC functions, with 30 security tests
+- Database schema, RLS policies, grants and RPC functions, with 42 security and schema tests
+- Live Supabase project (PathNigeria, London) verified end to end: student journey, enquiries, admin editing and verification, schools, counsellor access
 - Demo mode for everything above
 
 ### Needs configuration
