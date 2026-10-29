@@ -170,6 +170,11 @@ describe('protected areas', () => {
     expect(await screen.findByText(/Saved “Marine Biology”/)).toBeInTheDocument()
   })
 
+  it('explains that password setup is unavailable in demo mode', async () => {
+    renderApp('/account/password')
+    expect(await screen.findByText(/isn’t available in demo mode/)).toBeInTheDocument()
+  })
+
   it('shows the demo school dashboard with privacy-protected totals', async () => {
     const user = userEvent.setup()
     const router = renderApp('/sign-in')

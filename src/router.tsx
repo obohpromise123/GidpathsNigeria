@@ -49,6 +49,10 @@ export const routes: RouteObject[] = [
       { path: 'contact', Component: ContactPage },
       { path: 'sign-in', Component: SignInPage },
       {
+        path: 'account/password',
+        lazy: async () => ({ Component: (await import('./pages/SetPasswordPage')).default }),
+      },
+      {
         path: 'school',
         lazy: async () => ({ Component: (await import('./pages/school/SchoolDashboard')).default }),
       },

@@ -18,6 +18,58 @@ const schema = z.object({
 })
 type Form = z.infer<typeof schema>
 
+const resetSchema = z.object({ email: z.string().trim().pipe(z.email('Enter a valid email address')) })
+
+function ForgotPassword() {
+  const auth = useAuth()
+  const [open, setOpen] = useState(false)
+  const [sent, setSent] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<{ email: string }>({ resolver: zodResolver(resetSchema), defaultValues: { email: '' } })
+
+  if (!open) {
+    return (
+      <button type="button" onClick={() => setOpen(true)} className="mt-4 text-sm font-semibold text-teal-700 underline underline-offset-4">
+        Forgot your password?
+      </button>
+    )
+  }
+  if (sent) {
+    return (
+      <Notice kind="tip" className="mt-4">
+        If an account exists for that email, we’ve sent a link to set a new password. Check your inbox and spam folder. The link works once.
+      </Notice>
+    )
+  }
+  return (
+    <form
+      noValidate
+      className="mt-4 space-y-3 rounded-[var(--radius-card)] border border-sand-200 bg-white p-5"
+      onSubmit={handleSubmit(async ({ email }) => {
+        setError(null)
+        try {
+          await auth.requestPasswordReset(email)
+          setSent(true)
+        } catch (e) {
+          setError(friendlyError(e))
+        }
+      })}
+    >
+      <Field label="Your account email" htmlFor="reset-email" required error={errors.email?.message}>
+        <Input id="reset-email" type="email" autoComplete="email" {...register('email')} {...describedBy('reset-email', errors.email?.message)} />
+      </Field>
+      {error && <Notice kind="error">{error}</Notice>}
+      <Button type="submit" variant="secondary" loading={isSubmitting}>
+        Email me a reset link
+      </Button>
+    </form>
+  )
+}
+
 /** Only allow redirects to paths on this site (prevents open-redirect tricks). */
 function safeNext(value: string | null) {
   return value && value.startsWith('/') && !value.startsWith('//') ? value : null
@@ -100,6 +152,7 @@ export default function SignInPage() {
           <p className="text-xs text-slate-500">Accounts are created by a platform administrator. Ask them if you need access.</p>
         </form>
       )}
+      {!auth.isDemo && <ForgotPassword />}
     </div>
   )
 }

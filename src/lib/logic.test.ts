@@ -92,3 +92,14 @@ describe('participation report', () => {
     expect(report.hiddenGroups).toBe(2)
   })
 })
+
+describe('set-password rules', () => {
+  it('requires at least 10 characters and matching entries', async () => {
+    const { passwordSchema } = await import('../pages/SetPasswordPage')
+    expect(passwordSchema.safeParse({ password: 'short', confirm: 'short' }).success).toBe(false)
+    const mismatch = passwordSchema.safeParse({ password: 'a long enough phrase', confirm: 'a different phrase!' })
+    expect(mismatch.success).toBe(false)
+    expect(mismatch.error!.issues[0].path).toEqual(['confirm'])
+    expect(passwordSchema.safeParse({ password: 'a long enough phrase', confirm: 'a long enough phrase' }).success).toBe(true)
+  })
+})

@@ -88,7 +88,9 @@ npx supabase db push        # applies supabase/migrations
 
 ### 3.3 Create your first administrator
 
-1. **Authentication → Users → Invite user** and enter your email. Accept the invitation and set a password.
+1. **Authentication → Users → Invite user** and enter your email. The email link opens the site's **Set your password** page (`/account/password`), where you choose a password of at least 10 characters. Staff who forget their password can use **Forgot your password?** on the sign-in page.
+
+   > Supabase's built-in email sender is meant for testing: it has a low hourly limit and may only deliver to members of your Supabase team. Before inviting school staff, connect your own email provider in **Authentication → Emails → SMTP Settings**.
 2. In the **SQL Editor**, promote the account (roles can never be changed from the website itself):
 
 ```sql
@@ -133,7 +135,7 @@ Restart `npm run dev`. The demo banner disappears and data now comes from Supaba
 npm test
 ```
 
-There are **106 automated tests** in four groups:
+There are **108 automated tests** in four groups:
 
 - **Business logic** (`src/lib/*.test.ts`, `src/pages/admin/formModel.test.ts`, `src/data/**/*.test.ts`): recommendation scoring and explanations, roadmap building, search and filters, enquiry validation, privacy suppression of small groups, admin form rules, demo-mode behaviour, and the integrity of the bundled content (every link valid, nothing marked "verified").
 - **User journeys** (`src/app.test.tsx`): the full student flow (onboarding → quiz → results → roadmap), changing answers, course search, enquiry validation, the demo-mode enquiry message, redirects away from protected pages, access denied for the wrong role, and admin course creation with validation.

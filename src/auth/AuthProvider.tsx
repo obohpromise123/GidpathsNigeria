@@ -28,6 +28,10 @@ export interface AuthState {
   signIn: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
   demoSignIn: (kind: DemoUserKind) => void
+  /** Emails a link to /account/password. Never reveals whether the account exists. */
+  requestPasswordReset: (email: string) => Promise<void>
+  /** Sets a new password for the signed-in user (after an invite or reset link). */
+  updatePassword: (password: string) => Promise<void>
 }
 
 type Identity = Pick<AuthState, 'status' | 'userId' | 'email' | 'displayName' | 'isAdmin' | 'memberships'>
@@ -138,9 +142,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIdentity(demoIdentity(kind))
   }, [])
 
+  const requestPasswordReset = useCallback(async (email: string) => {
+    const db = await getSupabase()
+    if (!db) throw new AppError('Password reset is not available in demo mode.')
+    const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/account/password` })
+    // Supabase answers the same way whether or not the account exists; only surface rate limits.
+    if (error && /rate limit|too many/i.test(error.message)) {
+      throw new AppError('Too many requests. Please wait a few minutes and try again.')
+    }
+  }, [])
+
+  const updatePassword = useCallback(async (password: string) => {
+    const db = await getSupabase()
+    if (!db) throw new AppError('Setting a password is not available in demo mode.')
+    const { error } = await db.auth.updateUser({ password })
+    if (!error) return
+    if (/different from the old/i.test(error.message)) throw new AppError('Choose a password that is different from your current one.')
+    if (/weak|short|characters/i.test(error.message)) throw new AppError('That password is too weak. Use at least 10 characters.')
+    throw new AppError('We couldn’t save your password. The link may have expired; request a new one from the sign-in page.')
+  }, [])
+
   const value = useMemo<AuthState>(
-    () => ({ ...identity, isDemo: isDemoMode, signIn, signOut, demoSignIn }),
-    [identity, signIn, signOut, demoSignIn],
+    () => ({ ...identity, isDemo: isDemoMode, signIn, signOut, demoSignIn, requestPasswordReset, updatePassword }),
+    [identity, signIn, signOut, demoSignIn, requestPasswordReset, updatePassword],
   )
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
